@@ -80,6 +80,20 @@
   margin-top: 3rem;
 }
 
+.wrapper {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.card_custom {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 10px;
+  outline: 2px solid red;
+}
+
 .card {
   margin: 1rem;
   flex-basis: 45%;
