@@ -1,4 +1,4 @@
-import React, {PureComponent} from "react";
+import React, { useState } from "react";
 import BeforeFooter from "../../components/before-footer/before-footer";
 import Footer from "../../components/footer/footer";
 import Header from "../../components/header/header";
@@ -11,56 +11,21 @@ import axios from 'axios';
 import Link from "next/link";
 
 
-export default class Pack extends PureComponent {
+function Pack(props) {
 
-  constructor(props) {
-    super(props);
+  const [packsData, setPacksData] = useState(props.packsData);
+  const [pagination, setPagination] = useState(props.pagination);
 
-    this.state = {
-      packsData: this.props.packsData,
-      pagination: this.props.pagination
-    }
-
-    this.handleMoreClick = this.handleMoreClick.bind(this);
-    this.handlePackClick = this.handlePackClick.bind(this);
-    this.onDownload = this.onDownload.bind(this);
-  }
-
-  static async getInitialProps(ctx) {
-    const { id } = ctx.query;
-
-    const responcePacks = await axios.get(`http://95.216.159.188:7003/api/pack`);
-    const responcePack = await axios.get(`http://95.216.159.188:7003/api/pack/${id}`);
-    const responcePackIllustration = await axios.get(`http://95.216.159.188:7003/api/illustration?packId=${id}`);
-
-    const { cover, name, illustrationCount } = await responcePack.data.result.packData;
-    const index = await responcePack.data.result.packData.id;
-
-    const { illustrationData } = await responcePackIllustration.data.result;
-    const { packsData, pagination } = await responcePacks.data.result;
-
-
-    return {
-      cover,
-      name,
-      illustrationCount,
-      index,
-      illustrationData,
-      packsData,
-      pagination,
-    }
-  }
-
-  handleMoreClick(evt) {
+  function handleMoreClick (evt) {
     evt.preventDefault();
-    const { currentPage, allPage } = this.state.pagination;
+    const { currentPage, allPage } = pagination;
 
     if (currentPage < allPage) {
-      this.onConcatRequest()
+      onConcatRequest()
     }
   }
 
-  handlePackClick(evt) {
+  function handlePackClick (evt) {
     evt.preventDefault();
 
     axios.get(`http://95.216.159.188:7003/api/pack`, {
@@ -70,17 +35,16 @@ export default class Pack extends PureComponent {
     })
       .then((response) => {
         const { packsData, pagination } = response.data.result;
-        this.setState({
-          packsData,
-          pagination,
-        });
+
+        setPacksData(currentStatePacks.concat(packsData))
+        setPagination(pagination)
       })
   }
 
-  onConcatRequest() {
+  function onConcatRequest() {
 
-    const currentStatePacks = [...this.state.packsData];
-    const { currentPage } = this.state.pagination;
+    const currentStatePacks = [...packsData];
+    const { currentPage } = pagination;
 
     axios.get(`http://95.216.159.188:7003/api/pack`, {
       params: {
@@ -89,14 +53,13 @@ export default class Pack extends PureComponent {
     })
       .then((response) => {
         const { packsData, pagination } = response.data.result;
-        this.setState({
-          packsData: currentStatePacks.concat(packsData),
-          pagination,
-        });
+
+        setPacksData(currentStatePacks.concat(packsData))
+        setPagination(pagination)
       })
   }
 
-  onDownload(id) {
+  function onDownload(id) {
     axios({
       url: `http://95.216.159.188:7003/api/illustration/download/${id}`,
       method: 'GET',
@@ -113,11 +76,7 @@ export default class Pack extends PureComponent {
     });
   }
 
-  render() {
-
-    const { name, illustrationCount, cover, index, illustrationData } = this.props;
-    const { packsData, pagination } = this.state;
-
+    const { name, illustrationCount, cover, index, illustrationData } = props;
 
     return (
       <div className="pack">
@@ -155,7 +114,7 @@ export default class Pack extends PureComponent {
                 <div className="col-12">
                   <IllustrationsList
                     pictures={illustrationData}
-                    onDownload={this.onDownload}
+                    onDownload={onDownload}
                   />
                 </div>
               </div>
@@ -179,14 +138,14 @@ export default class Pack extends PureComponent {
               <div className="col-auto mx-auto">
                 <PacksList
                   packs={packsData}
-                  onClick={this.handlePackClick}
+                  onClick={handlePackClick}
                 />
               </div>
             </div>
             <div className="row">
               <div className="col mx-auto">
                 {pagination.currentPage < pagination.allPage ?
-                  <a href="#" className="base-link mx-auto" onClick={this.handleMoreClick}>
+                  <a href="#" className="base-link mx-auto" onClick={handleMoreClick}>
                     Browse all packs
                    </a>
                   :
@@ -200,6 +159,47 @@ export default class Pack extends PureComponent {
         <Footer />
       </div>
     );
+}
+
+export async function  getStaticPaths() {
+
+  const res = await axios.get(`http://95.216.159.188:7003/api/pack`);
+  const packs = await res.data.result.packsData;
+
+  const paths = packs.map((pack) => ({
+    params: { 
+      id: `${pack.id}`
+    }
+  }))
+
+  return { paths, fallback: false }
+}
+
+
+export async function getStaticProps({params}) {
+
+  const responcePacks = await axios.get(`http://95.216.159.188:7003/api/pack`);
+  const responcePack = await axios.get(`http://95.216.159.188:7003/api/pack/${params.id}`);
+  const responcePackIllustration = await axios.get(`http://95.216.159.188:7003/api/illustration?packId=${params.id}`);
+
+  const { cover, name, illustrationCount } = await responcePack.data.result.packData;
+  const index = await responcePack.data.result.packData.id;
+
+  const { illustrationData } = await responcePackIllustration.data.result;
+  const { packsData, pagination } = await responcePacks.data.result;
+
+  return {
+    props: {
+      cover,
+      name,
+      illustrationCount,
+      index,
+      illustrationData,
+      packsData,
+      pagination,
+    }
   }
 }
+
+export default Pack;
 

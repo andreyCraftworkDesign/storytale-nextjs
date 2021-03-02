@@ -1,0 +1,37 @@
+version: "3"
+services:
+  # fpm_storytale-app:
+  #   container_name: fpm.storytale_app
+  #   image: ewwgenn/storytale:fpm7.4_LOCAL
+  #   env_file: ./../../config/.env
+  #   restart: always
+  #   cap_add:
+  #     - ALL
+  #   volumes:
+  #     - "./../../:/www/"
+
+  # nginx_my-app:
+  #   container_name: nginx.my_app
+  #   image: nginx:alpine
+  #   restart: always
+    # depends_on:
+    #   - fpm_storytale-app
+    # links:
+    #   - fpm_storytale-app:fpm_storytale-app.local
+    # ports:
+    #   - "3002:80"
+    # volumes:
+    #   - "./nginx:/etc/nginx/conf.d"
+    #   - "./../../:/www/"
+
+  node_my-app:
+   container_name: node.my_app
+  #  env_file: ./../../config/.env
+   build:
+     context: ./
+     dockerfile: node/Dockerfile
+   volumes:
+    - "./../../:/www/"
+   command: "/bin/bash -c 'while :; do sleep 1; done'"
+
+
