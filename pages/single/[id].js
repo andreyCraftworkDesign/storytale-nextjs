@@ -9,8 +9,15 @@ import ReadyTo from "../../components/ready-to/ready-to";
 import axios from "axios";
 
 import { Popover } from 'antd';
+import { useRouter } from 'next/router'
 
-function SingleIllustration(props) {
+function SingleIllustration({data, illustrationsData}) {
+
+  const router = useRouter()
+
+  if (router.isFallback) {
+    return <div>Loading...</div>
+  }
   function onDownload(id) {
 
     axios({
@@ -28,39 +35,30 @@ function SingleIllustration(props) {
       console.log(error);
     });
   }
-  const {
-    cover,
-    packId,
-    packName,
-    name,
-    index,
-    moodName,
-    categories,
-    fileTypes,
-    keywords,
-    pictures,
-    test
-  } = props;
 
   const content = (
     <div className="popup-element">
       <div className="left-column">
         <div className="item">
           <p className="title">Pack</p>
-          <p className="description">{packName}</p>
+          <p className="description">
+            {data && data.pack.name}
+          </p>
         </div>
         <div className="item">
           <p className="title">Mood</p>
-          <p className="description">{moodName}</p>
+          <p className="description">
+            {data && data.mood.name}
+          </p>
         </div>
         <div className="item">
           <p className="title">File Types</p>
           <ul className="list">
             {
-              fileTypes.map((key, index) => (
-                <li key={index}>
-                  <p className="description">.{key}</p>
-                </li>
+              data && data.assignedExtensions.map((key, index) => (
+                  <li key={index}>
+                    <p className="description">.{key}</p>
+                  </li>
               ))
             }
           </ul>
@@ -71,7 +69,7 @@ function SingleIllustration(props) {
           <p className="title">Category</p>
           <ul className="list">
             {
-              categories.map((key, index) => (
+              data && data.categories.map((key, index) => (
                 <li key={index}>
                   <p className="description">{key.name}</p>
                 </li>
@@ -86,35 +84,40 @@ function SingleIllustration(props) {
   return (
     <div className="single-illustration-page">
       {/* {error === true ? <Redirect to="/error" /> : null} */}
-
       <Header />
+      <h1>
+        {data && data.pack.id}
+      </h1>
 
       <div className="container-fluid">
         <div className="row">
           <div className="col">
+            {data &&
             <Link
-              href={`/pack/${packId}`}
+                href={`/pack/${data.pack.id}`}
             >
               <a className="button-icon neutral outline escape">
                 <span>
                   <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      fillRule="evenodd"
-                      clipRule="evenodd"
-                      d="M10 9V7.41C10 6.52 8.92 6.07 8.29 6.7L3.7 11.29C3.31 11.68 3.31 12.31 3.7 12.7L8.29 17.29C8.92 17.92 10 17.48 10 16.59V14.9C15 14.9 18.5 16.5 21 20C20 15 17 10 10 9Z"
-                      fill="#18214D"
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M10 9V7.41C10 6.52 8.92 6.07 8.29 6.7L3.7 11.29C3.31 11.68 3.31 12.31 3.7 12.7L8.29 17.29C8.92 17.92 10 17.48 10 16.59V14.9C15 14.9 18.5 16.5 21 20C20 15 17 10 10 9Z"
+                        fill="#18214D"
                     />
                   </svg>
                 </span>
-                <span>{packName}</span>
+                <span>
+                  {data.pack.name}
+                </span>
               </a>
-            </Link>
+            </Link>}
           </div>
         </div>
       </div>
@@ -125,7 +128,9 @@ function SingleIllustration(props) {
               <div className="widget-single-product">
                 <div className="top"></div>
                 <div className="middle">
-                  <h1>{name}</h1>
+                  <h1>
+                    {data && data.name}
+                  </h1>
                 </div>
                 <div className="bottom">
                   <a href="" className="button-icon neutral like">
@@ -148,28 +153,30 @@ function SingleIllustration(props) {
                     <span>0</span>
                   </a>
 
+                  {data &&
                   <a
-                    onClick={() => onDownload(index)}
-                    className="button-icon blue"
+                      onClick={() => onDownload(data.id)}
+                      className="button-icon blue"
                   >
                     <span>
                       <svg
-                        width="25"
-                        height="24"
-                        viewBox="0 0 25 24"
-                        fill="none"
-                        xmlns="http://www.w3.org/2000/svg"
+                          width="25"
+                          height="24"
+                          viewBox="0 0 25 24"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
-                          fillRule="evenodd"
-                          clipRule="evenodd"
-                          d="M17.3945 9H15.8045V4C15.8045 3.45 15.3545 3 14.8045 3H10.8045C10.2545 3 9.8045 3.45 9.8045 4V9H8.2145C7.3245 9 6.8745 10.08 7.5045 10.71L12.0945 15.3C12.4845 15.69 13.1145 15.69 13.5045 15.3L18.0945 10.71C18.7245 10.08 18.2845 9 17.3945 9ZM5.8045 19C5.8045 19.55 6.2545 20 6.8045 20H18.8045C19.3545 20 19.8045 19.55 19.8045 19C19.8045 18.45 19.3545 18 18.8045 18H6.8045C6.2545 18 5.8045 18.45 5.8045 19Z"
-                          fill="#ffffff"
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                            d="M17.3945 9H15.8045V4C15.8045 3.45 15.3545 3 14.8045 3H10.8045C10.2545 3 9.8045 3.45 9.8045 4V9H8.2145C7.3245 9 6.8745 10.08 7.5045 10.71L12.0945 15.3C12.4845 15.69 13.1145 15.69 13.5045 15.3L18.0945 10.71C18.7245 10.08 18.2845 9 17.3945 9ZM5.8045 19C5.8045 19.55 6.2545 20 6.8045 20H18.8045C19.3545 20 19.8045 19.55 19.8045 19C19.8045 18.45 19.3545 18 18.8045 18H6.8045C6.2545 18 5.8045 18.45 5.8045 19Z"
+                            fill="#ffffff"
                         />
                       </svg>
                     </span>
                     <span>Subscribe to download</span>
                   </a>
+                  }
                 </div>
               </div>
             </div>
@@ -182,7 +189,7 @@ function SingleIllustration(props) {
               <div className="illustrations">
                 <div className="product">
                   <a className="link">
-                    {cover != null ? <img src={cover} /> : null}
+                    {data && <img src={data.cover} /> }
                   </a>
                 </div>
               </div>
@@ -197,12 +204,13 @@ function SingleIllustration(props) {
                 <div className="left-column">
                   <p className="header">Keywords</p>
                   <div className="list">
-                    {keywords ?
-                      keywords.map((key, index) => (
-                        <a href="#" key={index}>
-                          <span className="badge outline neutral">{key}</span>
-                        </a>
-                      )) : null}
+                    {data && data.keywords &&
+                        data.keywords.map((key, index) => (
+                          <a href="#" key={index}>
+                            <span className="badge outline neutral">{key}</span>
+                          </a>
+                      ))
+                    }
                   </div>
                 </div>
                 <div className="right-column">
@@ -219,7 +227,7 @@ function SingleIllustration(props) {
         <div className="container">
           <div className="row">
             <div className="col">
-              <h4 className="text-center header">More from {packName !== null ? packName : null} </h4>
+              <h4 className="text-center header">More from {data && data.pack.name} </h4>
             </div>
           </div>
         </div>
@@ -227,10 +235,13 @@ function SingleIllustration(props) {
         <div className="container">
           <div className="row">
             <div className="col-12">
-              <IllustrationsList
-                pictures={pictures}
-                onDownload={() => onDownload}
-              />
+              {
+                illustrationsData &&
+                <IllustrationsList
+                    pictures={illustrationsData}
+                    onDownload={() => onDownload}
+                />
+              }
             </div>
           </div>
         </div>
@@ -254,13 +265,11 @@ export async function getStaticPaths() {
     }
   }))
 
-  return { paths, fallback: false }
+  return { paths, fallback: true }
 }
 
 
 export async function getStaticProps({params}) {
-
-  let pictures, index, cover, categories, name, fileTypes, keywords, moodName, packId, packName, test;
 
   const res = await axios.get(`http://95.216.159.188:7003/api/illustration/${params.id}`);
   const data = await res.data.result.illustrationData;
@@ -271,32 +280,12 @@ export async function getStaticProps({params}) {
 
   const illustrationsData = await responcePackIllustration.data.result.illustrationData;
 
-  if (res.data.success === true && (data !== null)) {
-    cover = data.cover;
-    index = data.id;
-    categories = data.categories;
-    name = data.name;
-    fileTypes = data.assignedExtensions;
-    keywords = data.keywords;
-    moodName = data.mood.name;
-    packId = data.pack.id;
-    packName = data.pack.name;
-    pictures = illustrationsData;
-  }
-
   return {
     props: {
-      cover,
-      categories,
-      name,
-      fileTypes,
-      keywords,
-      moodName,
-      packId,
-      packName,
-      pictures,
-      index,
-    }
+      data,
+      illustrationsData
+    },
+    revalidate: 1,
   }
 }
 

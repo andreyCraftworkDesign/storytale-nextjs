@@ -11,59 +11,17 @@ import IllustrationPack from "../components/illustration-pack/illustration-pack"
 import ReadyTo from "../components/ready-to/ready-to";
 import BrowseByMood from "../components/browse-by-mood/browse-by-mood";
 
-
 const MAX_ELEMENTS = 12;
 const MAX_PACKS = 20;
 
-export default class About extends React.Component {
-
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      data: this.props.data
-    }
-
-  }
-
-  static async getInitialProps() {
-
-    const firstResponce = await axios.get(`http://95.216.159.188:7003/api/pack`);
-
-    const data = await firstResponce.data.result.packsData.filter(
-      (item, index) => index < MAX_PACKS
-    );
-
-    const secondResponce = await axios.get(
-      `http://95.216.159.188:7003/api/illustration?packId=1`
-    );
-
-    const thirdResponce = await axios.get(
-      `http://95.216.159.188:7003/api/illustration?packId=2`
-    );
-
-    const fourResponce = await axios.get(
-      `http://95.216.159.188:7004/api/illustration_log/getCreatedCount`
-    );
-
-    const { count } = await fourResponce.data.result;
-
-
-    return {
-      packs: data,
-      firstPackInfo: data[0],
-      secondPackInfo: data[1],
-      firstPackIllustrations: secondResponce.data.result.illustrationData,
-      secondPackIllustrations: thirdResponce.data.result.illustrationData,
-      count,
-    };
-  }
-
-
-
-  render() {
-
-    const { count } = this.props;
+function Main(props) {
+    const {
+      packs,
+      firstPackInfo,
+      secondPackInfo,
+      firstPackIllustrations,
+      secondPackIllustrations,
+      count} = props;
 
     return (
       <>
@@ -147,18 +105,18 @@ export default class About extends React.Component {
               </div>
             </div>
           </div>
-          {this.props.firstPackInfo != null ? (
+          {firstPackInfo != null ? (
             <IllustrationPack
-              packInfo={this.props.firstPackInfo}
-              packIllustrations={this.props.firstPackIllustrations}
+              packInfo={firstPackInfo}
+              packIllustrations={firstPackIllustrations}
             />
           ) : null}
 
-          {this.props.secondPackInfo != null ? (
+          {secondPackInfo != null ? (
             <IllustrationPack
               classes="section"
-              packInfo={this.props.secondPackInfo}
-              packIllustrations={this.props.secondPackIllustrations}
+              packInfo={secondPackInfo}
+              packIllustrations={secondPackIllustrations}
             />
           ) : null}
         </section>
@@ -173,7 +131,7 @@ export default class About extends React.Component {
             <div className="row content-row">
               <div className="col-xl-10 col-lg-12 mx-auto">
                 <PacksList
-                  packs={this.props.packs}
+                  packs={packs}
                 />
               </div>
             </div>
@@ -249,5 +207,41 @@ export default class About extends React.Component {
         <Footer />
       </>
     );
+}
+
+export async function getStaticProps({params}) {
+
+  const firstResponce = await axios.get(`http://95.216.159.188:7003/api/pack`);
+
+  const data = await firstResponce.data.result.packsData.filter(
+      (item, index) => index < MAX_PACKS
+  );
+
+  const secondResponce = await axios.get(
+      `http://95.216.159.188:7003/api/illustration?packId=1`
+  );
+
+  const thirdResponce = await axios.get(
+      `http://95.216.159.188:7003/api/illustration?packId=2`
+  );
+
+  const fourResponce = await axios.get(
+      `http://95.216.159.188:7004/api/illustration_log/getCreatedCount`
+  );
+
+  const { count } = await fourResponce.data.result;
+
+  return {
+    props: {
+      packs: data,
+      firstPackInfo: data[0],
+      secondPackInfo: data[1],
+      firstPackIllustrations: secondResponce.data.result.illustrationData,
+      secondPackIllustrations: thirdResponce.data.result.illustrationData,
+      count,
+    },
+    revalidate: 1,
   }
 }
+
+export default Main;
