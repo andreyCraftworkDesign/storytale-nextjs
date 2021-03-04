@@ -85,9 +85,6 @@ function SingleIllustration({data, illustrationsData}) {
     <div className="single-illustration-page">
       {/* {error === true ? <Redirect to="/error" /> : null} */}
       <Header />
-      <h1>
-        {data && data.pack.id}
-      </h1>
 
       <div className="container-fluid">
         <div className="row">
